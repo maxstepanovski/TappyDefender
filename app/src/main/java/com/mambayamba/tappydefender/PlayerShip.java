@@ -31,7 +31,7 @@ public class PlayerShip {
 
     public void update(){
         if(boosting){
-            speed += 3;
+            speed += 6;
         }else{
             speed -=5;
         }
@@ -51,7 +51,6 @@ public class PlayerShip {
         if(y < minY){
             y = minY;
         }
-        Log.d("happy", x + " : "+y+" speed"+ speed);
     }
 
     public Bitmap getBitmap() {

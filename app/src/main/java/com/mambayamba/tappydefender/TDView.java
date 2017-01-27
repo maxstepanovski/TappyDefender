@@ -26,9 +26,11 @@ public class TDView extends SurfaceView implements Runnable {
     private SurfaceHolder ourHolder;
     private Paint paint;
     private int enemyCount = 5;
+    private int specCount = 500;
 
     private PlayerShip player;
     private List<EnemyShip> enemies = new ArrayList<>();
+    private List<SpaceDust> specs = new ArrayList<>();
 
     public TDView(Context context, int screenSizeX, int screenSizeY) {
         super(context);
@@ -39,6 +41,10 @@ public class TDView extends SurfaceView implements Runnable {
             EnemyShip enemy = new EnemyShip(context, screenSizeX, screenSizeY);
             enemies.add(enemy);
         }
+        for(int i=0; i<specCount; ++i){
+            SpaceDust spec = new SpaceDust(screenSizeX, screenSizeY);
+            specs.add(spec);
+        }
     }
 
     @Override
@@ -46,12 +52,10 @@ public class TDView extends SurfaceView implements Runnable {
         switch(event.getAction() & event.ACTION_MASK){
             case MotionEvent.ACTION_DOWN:{
                 player.setBoosting();
-                Log.d("happy", "pressed!");
                 break;
             }
             case MotionEvent.ACTION_UP:{
                 player.stopBoosting();
-                Log.d("happy", "released!");
                 break;
             }
         }
@@ -62,7 +66,6 @@ public class TDView extends SurfaceView implements Runnable {
         playing = false;
         try {
             gameThread.join();
-            Log.d("happy", "game thread stopped!");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -72,7 +75,6 @@ public class TDView extends SurfaceView implements Runnable {
         playing = true;
         gameThread = new Thread(this);
         gameThread.start();
-        Log.d("happy", "game thread started!");
     }
 
     @Override
@@ -88,6 +90,9 @@ public class TDView extends SurfaceView implements Runnable {
         player.update();
         for(EnemyShip enemy: enemies){
             enemy.update(player.getSpeed());
+        }
+        for(SpaceDust spec: specs){
+            spec.update(player.getSpeed());
         }
     }
 
@@ -111,6 +116,10 @@ public class TDView extends SurfaceView implements Runnable {
                         enemy.getY(),
                         paint
                 );
+            }
+            paint.setColor(Color.argb(255,255,255,255));
+            for(SpaceDust spec: specs){
+                canvas.drawPoint(spec.getX(), spec.getY(), paint);
             }
             //рисуем всю сцену и разблокируем холст
             ourHolder.unlockCanvasAndPost(canvas);
