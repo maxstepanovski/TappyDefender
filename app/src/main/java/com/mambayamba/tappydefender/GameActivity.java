@@ -2,7 +2,6 @@ package com.mambayamba.tappydefender;
 
 import android.graphics.Point;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Display;

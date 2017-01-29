@@ -3,6 +3,7 @@ package com.mambayamba.tappydefender;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.util.Log;
 
 /**
@@ -18,6 +19,8 @@ public class PlayerShip {
     private int x,y;
     private int speed;
     private boolean boosting;
+    private Rect hitBox;
+    private long shields;
 
     public PlayerShip(Context context, int screenSizeX, int screenSizeY) {
         speed = 1;
@@ -27,6 +30,9 @@ public class PlayerShip {
         boosting = false;
         minY = 0;
         maxY = screenSizeY - bitmap.getHeight();
+        shields = 3;
+
+        hitBox = new Rect(x, y, x+bitmap.getWidth(), y+bitmap.getHeight());
     }
 
     public void update(){
@@ -51,6 +57,15 @@ public class PlayerShip {
         if(y < minY){
             y = minY;
         }
+
+        hitBox.left = x;
+        hitBox.top = y;
+        hitBox.right = x + bitmap.getWidth();
+        hitBox.bottom = y + bitmap.getHeight();
+    }
+
+    public void reduceShields(){
+        shields--;
     }
 
     public Bitmap getBitmap() {
@@ -65,8 +80,24 @@ public class PlayerShip {
         return x;
     }
 
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setShields(long shields) {
+        this.shields = shields;
+    }
+
     public int getY() {
         return y;
+    }
+
+    public Rect getHitBox() {
+        return hitBox;
+    }
+
+    public long getShields() {
+        return shields;
     }
 
     public void stopBoosting(){

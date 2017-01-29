@@ -4,12 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.support.annotation.Nullable;
-
-import java.io.File;
-import java.io.RandomAccessFile;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
+import android.graphics.Rect;
 import java.util.Random;
 
 /**
@@ -22,13 +17,10 @@ public class EnemyShip {
     private int maxX, minX;
     private int maxY, minY;
     private int speed = 1;
+    private Rect hitBox;
 
     public EnemyShip(Context context, int screenSizeX, int screenSizeY){
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.enemy);
-//        if(!bitmap.isMutable()){
-//            bitmap = convertToMutable(context, bitmap);
-//        }
-//        bitmap.reconfigure(100, 80, Bitmap.Config.ARGB_4444);
         bitmap = getResizedBitmap(bitmap, 120, 100);
         maxX = screenSizeX;
         maxY = screenSizeY;
@@ -39,6 +31,8 @@ public class EnemyShip {
         speed = generator.nextInt(6)+10;
         y = generator.nextInt(screenSizeY)-bitmap.getHeight();
         x = screenSizeX;
+
+        hitBox = new Rect(x, y, x+bitmap.getWidth(), y+bitmap.getHeight());
     }
 
     public void update(int playerSpeed){
@@ -51,6 +45,11 @@ public class EnemyShip {
             x = maxX;
             y = generator.nextInt(maxY) - bitmap.getHeight();
         }
+
+        hitBox.left = x;
+        hitBox.top = y;
+        hitBox.right = x + bitmap.getWidth();
+        hitBox.bottom = y + bitmap.getHeight();
     }
 
     public Bitmap getBitmap() {
@@ -63,6 +62,14 @@ public class EnemyShip {
 
     public int getY() {
         return y;
+    }
+
+    public Rect getHitBox() {
+        return hitBox;
+    }
+
+    public void setX(int x) {
+        this.x = x;
     }
 
     public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
