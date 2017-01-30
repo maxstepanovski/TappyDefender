@@ -18,16 +18,23 @@ public class EnemyShip {
     private int maxY, minY;
     private int speed = 1;
     private Rect hitBox;
+    private int[] images;
 
     public EnemyShip(Context context, int screenSizeX, int screenSizeY){
-        bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.enemy);
+        images = new int[]{R.drawable.enemy,
+                R.drawable.enemy2,
+                R.drawable.enemy3
+        };
+        Random generator = new Random();
+        int skin = generator.nextInt(3);
+        bitmap = BitmapFactory.decodeResource(context.getResources(), images[skin]);
         bitmap = getResizedBitmap(bitmap, 120, 100);
         maxX = screenSizeX;
         maxY = screenSizeY;
         minX = 0;
         minY = 0;
 
-        Random generator = new Random();
+
         speed = generator.nextInt(6)+10;
         y = generator.nextInt(screenSizeY)-bitmap.getHeight();
         x = screenSizeX;

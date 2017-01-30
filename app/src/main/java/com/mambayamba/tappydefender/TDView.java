@@ -1,25 +1,18 @@
 package com.mambayamba.tappydefender;
 
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.media.SoundPool;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import static java.lang.Thread.sleep;
 
 /**
@@ -27,6 +20,12 @@ import static java.lang.Thread.sleep;
  */
 
 public class TDView extends SurfaceView implements Runnable {
+    public static final int TOTAL_DISTANCE = 15000;
+    public static final String PREFS = "com.mambayamba.tappydefender";
+    private static final String RECORD = "record";
+    private static final long NO_VALUE = 0;
+    private static final long DEFAULT_RECORD = 100000;
+    private SharedPreferences prefs;
     private SoundPool soundPool;
     private int start = -1, bump = -1, destroy = -1, win = -1;
     private volatile boolean playing;
@@ -71,7 +70,12 @@ public class TDView extends SurfaceView implements Runnable {
         paint = new Paint();
         gameOver = false;
         player = new PlayerShip(context, screenSizeX, screenSizeY);
-        fastestTime = 100000;
+
+        prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        if(prefs.contains(RECORD))
+            fastestTime = prefs.getLong(RECORD, DEFAULT_RECORD);
+        else
+            fastestTime = DEFAULT_RECORD;
 
         for(int i=0; i < enemyCount; ++i){
             EnemyShip enemy = new EnemyShip(context, screenSizeX, screenSizeY);
@@ -89,7 +93,7 @@ public class TDView extends SurfaceView implements Runnable {
         for(EnemyShip enemy: enemies){
             enemy.setX(screenSizeX);
         }
-        distanceRemaining = 15000;
+        distanceRemaining = TOTAL_DISTANCE;
         player.setShields(3);
         timeTaken = 0;
         timeStarted = System.currentTimeMillis();
@@ -157,8 +161,9 @@ public class TDView extends SurfaceView implements Runnable {
                 soundPool.play(destroy, 1,1,0,0,1);
             }
         }
-        for(int i=0; i<specCount; ++i)
+        for(int i=0; i<specCount; ++i){
             specs.get(i).update(player.getSpeed());
+        }
         if(!gameOver){
             distanceRemaining -= player.getSpeed();
             timeTaken = System.currentTimeMillis() - timeStarted;
@@ -166,6 +171,9 @@ public class TDView extends SurfaceView implements Runnable {
         if(distanceRemaining <= 0){
             if(timeTaken < fastestTime){
                 fastestTime = timeTaken;
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putLong(RECORD, timeTaken);
+                editor.apply();
             }
             soundPool.play(win, 1, 1, 0, 0, 1);
             distanceRemaining = 0;
@@ -206,8 +214,8 @@ public class TDView extends SurfaceView implements Runnable {
                 canvas.drawText("Speed: " + player.getSpeed(), 2*(screenSizeX/3), screenSizeY - 20, paint);
             }else{
                 paint.setTextAlign(Paint.Align.CENTER);
-                paint.setTextSize(80);
                 paint.setColor(Color.CYAN);
+                paint.setTextSize(80);
                 canvas.drawText("Game Over", screenSizeX/2, 100, paint);
                 paint.setTextSize(25);
                 canvas.drawText("Fastest: " + fastestTime , screenSizeX/2, 160, paint);
